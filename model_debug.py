@@ -25,7 +25,9 @@ if __name__ == "__main__":
         # "/home/scb123/yolov8/ultralytics/cfg/models/v8/yolov8-ghostnet-160.yaml", nc=2,
         # r"F:\PythonPro\DaiLian\yolov8-self\ultralytics\cfg\models\v8\yolov8-efficient_v2-b3.yaml", nc=2,
         # r"F:\PythonPro\DaiLian\yolov8-self\ultralytics\cfg\models\v8\yolov8-efficient_v2-b3-rfa.yaml", nc=2,
-        r"F:\PythonPro\DaiLian\yolov8-self\ultralytics\cfg\models\v8\yolov8-efficient_v2-b3-sppf-rfa.yaml", nc=2,
+        # r"F:\PythonPro\DaiLian\yolov8-self\ultralytics\cfg\models\v8\yolov8-efficient_v2-b3-asppf.yaml", nc=2,
+        # r"F:\PythonPro\DaiLian\yolov8-self\ultralytics\cfg\models\v8\yolov8-efficient_v2-b3-dwrfa.yaml", nc=2,
+        r"F:\PythonPro\DaiLian\yolov8-self\ultralytics\cfg\models\v8\yolov8-efficient_v2-b3-all.yaml", nc=2,
     ).cuda()
     # model = model.cuda()
     # model.eval()

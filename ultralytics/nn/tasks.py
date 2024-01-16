@@ -7,7 +7,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
-from ultralytics.nn.modules import (AIFI, C1, C2, C3, C3TR, SPP, SPPF, SPPF_RFA, Bottleneck, BottleneckCSP, C2f, C3Ghost, C3x,
+from ultralytics.nn.modules import (AIFI, C1, C2, C3, C3TR, SPP, SPPF, SPPF_RFA, ASPPF, Bottleneck, BottleneckCSP, C2f, C3Ghost, C3x,
                                     Classify, Concat, Conv, Conv2, ConvTranspose, Detect, DWConv, DWConvTranspose2d,
                                     Focus, GhostBottleneck, GhostConv, HGBlock, HGStem, Pose, RepC3, RepConv,
                                      RTDETRDecoder, Segment)
@@ -20,7 +20,7 @@ from ultralytics.utils.torch_utils import (fuse_conv_and_bn, fuse_deconv_and_bn,
 
 
 from ultralytics.nn.models.efficientnet import efficientnet_b3
-from ultralytics.nn.models.efficientnet_v2 import tf_efficientnetv2_b3, tf_efficientnetv2_b3_rfa
+from ultralytics.nn.models.efficientnet_v2 import tf_efficientnetv2_b3, tf_efficientnetv2_b3_rfa, tf_efficientnetv2_b3_dwrfa
 from ultralytics.nn.models.edgenext import edgenext_small
 from ultralytics.nn.models.mobilenetv3 import mobilenetv3_large_100
 from ultralytics.nn.models.tiny_vit import tiny_vit_5m_224
@@ -724,6 +724,9 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             if m in (BottleneckCSP, C1, C2, C2f, C3, C3TR, C3Ghost, C3x, RepC3):
                 args.insert(2, n)  # number of repeats
                 n = 1
+        elif m is ASPPF:
+            c1, c2 = ch[f], args[0]
+            args = [c1, c2, *args[1:]]
         elif m is AIFI:
             args = [ch[f], *args]
         elif m in (HGStem, HGBlock):
@@ -746,7 +749,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
         elif m is RTDETRDecoder:  # special case, channels arg must be passed in index 1
             args.insert(1, [ch[x] for x in f])
-        elif m in (efficientnet_b3, tf_efficientnetv2_b3, tf_efficientnetv2_b3_rfa, edgenext_small, mobilenetv3_large_100, tiny_vit_5m_224, ghostnetv2_160):
+        elif m in (efficientnet_b3, tf_efficientnetv2_b3, tf_efficientnetv2_b3_rfa, tf_efficientnetv2_b3_dwrfa, edgenext_small, mobilenetv3_large_100, tiny_vit_5m_224, ghostnetv2_160):
             m = m()
             c2 = m.channel
             # print(c2)

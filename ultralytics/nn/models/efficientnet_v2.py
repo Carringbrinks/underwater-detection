@@ -54,7 +54,7 @@ from ._manipulate import checkpoint_seq
 from ._registry import generate_default_cfgs, register_model, register_model_deprecations
 
 __all__ = ['EfficientNet', 'EfficientNetFeatures']
-from .RFAConv import RFAConv
+from .RFAConv import RFAConv, DWRFAConv
 
 class EfficientNet(nn.Module):
     """ EfficientNet
@@ -112,6 +112,15 @@ class EfficientNet(nn.Module):
             self.rfa_conv_4 = RFAConv(136, 136, 3)
             self.rfa_conv_5 = RFAConv(232, 232, 3)
             self.raf_conv_blocks = nn.Sequential(*[self.rfa_conv_0, self.rfa_conv_1, self.rfa_conv_2, self.rfa_conv_3, self.rfa_conv_4, self.rfa_conv_5])
+
+        elif model_type == "backbone_dwrfa":
+            self.dwrfa_conv_0 = DWRFAConv(16, 16, 3)
+            self.dwrfa_conv_1 = DWRFAConv(40, 40, 3)
+            self.dwrfa_conv_2 = DWRFAConv(56, 56, 3)
+            self.dwrfa_conv_3 = DWRFAConv(112, 112, 3)
+            self.dwrfa_conv_4 = DWRFAConv(136, 136, 3)
+            self.dwrfa_conv_5 = DWRFAConv(232, 232, 3)
+            self.dwraf_conv_blocks = nn.Sequential(*[self.dwrfa_conv_0, self.dwrfa_conv_1, self.dwrfa_conv_2, self.dwrfa_conv_3, self.dwrfa_conv_4, self.dwrfa_conv_5])
 
 
         # Stem
@@ -183,6 +192,12 @@ class EfficientNet(nn.Module):
                 for i, (block, raf_conv) in enumerate(zip(self.blocks, self.raf_conv_blocks)):
                     x = block(x)
                     x = raf_conv(x)
+                    if i in [1,2,4,5]:
+                        feature_map.append(x)
+            elif self.model_type == "backbone_dwrfa":
+                for i, (block, dwraf_conv) in enumerate(zip(self.blocks, self.dwraf_conv_blocks)):
+                    x = block(x)
+                    x = dwraf_conv(x)
                     if i in [1,2,4,5]:
                         feature_map.append(x)
             else:
@@ -2232,7 +2247,14 @@ def tf_efficientnetv2_b3_rfa(pretrained=False, **kwargs) -> EfficientNet:
         'tf_efficientnetv2_b3', channel_multiplier=1.2, depth_multiplier=1.4, pretrained=pretrained, model_type="backbone_rfa", **kwargs)
     return model
 
-
+@register_model
+def tf_efficientnetv2_b3_dwrfa(pretrained=False, **kwargs) -> EfficientNet:
+    """ EfficientNet-V2-B3. Tensorflow compatible variant """
+    kwargs.setdefault('bn_eps', BN_EPS_TF_DEFAULT)
+    kwargs.setdefault('pad_type', 'same')
+    model = _gen_efficientnetv2_base(
+        'tf_efficientnetv2_b3', channel_multiplier=1.2, depth_multiplier=1.4, pretrained=pretrained, model_type="backbone_dwrfa", **kwargs)
+    return model
 
 @register_model
 def mixnet_s(pretrained=False, **kwargs) -> EfficientNet:

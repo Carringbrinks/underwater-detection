@@ -22,7 +22,7 @@ backbone:
   #  这种添加方式需要注意主干网络的最后一层输出是在yolo的第一层，所以对于输出通道要使用一个占位符0， 相当于yolo的前面还要有四层feature_map
   # [from, repeats, module, args]
   - [-1, 1, tf_efficientnetv2_b3_dwrfa, []]  # 4
-  - [-1, 1, ASPPF, [232, 3]]  # 5
+  - [-1, 1, SPPF, [1024, 5]]  # 5
 
 # YOLOv8.0n head
 head:
